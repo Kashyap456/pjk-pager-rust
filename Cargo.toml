@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "pager-client",
+    "pager-server"
+]
