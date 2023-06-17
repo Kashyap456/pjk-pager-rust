@@ -1,0 +1,13 @@
+{
+  "db": "SQLite",
+  "c87c2f5ad8ac474803aadd9ee3d820c61cf5268c71b4afa803ceec6762f2d6dd": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "INSERT INTO keyval (ukey, hashpass) VALUES (?, ?)"
+  }
+}

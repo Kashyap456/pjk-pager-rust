@@ -1,13 +1,18 @@
 use core::panic;
 
-use axum::{routing::get, Router};
+use axum::{routing::get, Extension, Router};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
+
+mod db;
+mod handlers;
+mod params;
 
 const DB_URL: &str = "sqlite://keyvalue.db";
 
 #[tokio::main]
 async fn main() {
     println!("Hello, world!");
+    std::env::set_var("DATABASE_URL", DB_URL);
 
     if !Sqlite::database_exists(DB_URL).await.unwrap_or(false) {
         println!("Creating database...");
@@ -35,9 +40,12 @@ async fn main() {
 
     println!("migration: {:?}", migration_results);
 
-    let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, World!" }))
+        .route("/register_client", get(handlers::register_client))
+        .layer(Extension(db));
 
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
