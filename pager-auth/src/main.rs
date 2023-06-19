@@ -2,10 +2,10 @@ use core::panic;
 
 use axum::{routing::get, Extension, Router};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
+use tower_cookies::CookieManagerLayer;
 
 mod db;
 mod handlers;
-mod params;
 
 const DB_URL: &str = "sqlite://keyvalue.db";
 
@@ -43,7 +43,8 @@ async fn main() {
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/register_client", get(handlers::register_client))
-        .layer(Extension(db));
+        .layer(Extension(db))
+        .layer(CookieManagerLayer::new());
 
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
         .serve(app.into_make_service())

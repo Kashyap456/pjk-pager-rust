@@ -1,11 +1,4 @@
 -- Add migration script here
-CREATE TABLE IF NOT EXISTS users
-(
-    username TEXT PRIMARY KEY,
-    salt TEXT NOT NULL,
-    userhash TEXT NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS groups
 (
     group_name TEXT PRIMARY KEY,
