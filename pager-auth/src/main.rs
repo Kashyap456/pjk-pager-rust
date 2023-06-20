@@ -41,6 +41,7 @@ async fn main() {
     println!("migration: {:?}", migration_results);
 
     let app = Router::new()
+        .layer(axum::middleware::from_fn(handlers::auth_fn))
         .route("/", get(|| async { "Hello, World!" }))
         .route("/register_client", get(handlers::register_client))
         .layer(Extension(db))

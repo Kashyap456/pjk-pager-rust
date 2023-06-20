@@ -1,9 +1,12 @@
 use crate::db::{self, UserRec};
-use axum::extract::Extension;
-use axum::response::IntoResponse;
-use axum::Json;
+use axum::extract::{Extension, TypedHeader};
+use axum::headers::{authorization::Bearer, Authorization};
+use axum::middleware::Next;
+use axum::response::{IntoResponse, Response};
+use axum::{Json, RequestPartsExt};
 use axum_macros::debug_handler;
-use http::StatusCode;
+use cookie::time::Duration;
+use http::{Request, StatusCode};
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use rand::{rngs::StdRng, SeedableRng};
@@ -89,7 +92,7 @@ pub async fn login_user(
     let mut hasher = DefaultHasher::new();
     let rec = db::get_user(conn.clone(), body.username.clone()).await;
     if Option::is_none(&rec) {
-        return Err(StatusCode::FORBIDDEN);
+        return Err(StatusCode::UNAUTHORIZED);
     }
     let mut rng = StdRng::from_entropy();
     let rec = rec.unwrap();
@@ -101,7 +104,7 @@ pub async fn login_user(
     user.hash(&mut hasher);
     let hashed_val = hasher.finish();
     if rec.userhash != hashed_val.to_string() {
-        return Err(StatusCode::FORBIDDEN);
+        return Err(StatusCode::UNAUTHORIZED);
     }
     let access_token: String = rng
         .clone()
@@ -114,15 +117,41 @@ pub async fn login_user(
         .take(16)
         .map(char::from)
         .collect();
-    cookies.add(Cookie::new(
-        body.username.clone() + "_access",
-        access_token.clone(),
-    ));
-    cookies.add(Cookie::new(
-        body.username.clone() + "_refresh",
-        refresh_token.clone(),
-    ));
+    let mut access_cookie = Cookie::new(access_token.clone(), "auth");
+    access_cookie.set_max_age(Some(Duration::DAY));
+    cookies.add(access_cookie);
+    let mut refresh_cookie = Cookie::new(refresh_token.clone(), "refresh");
+    refresh_cookie.set_max_age(Some(Duration::WEEK));
+    cookies.add(refresh_cookie);
     Ok(Json(
         json!({"access_token": access_token, "refresh_token": refresh_token}),
     ))
+}
+
+pub async fn auth_fn<B>(
+    cookies: Cookies,
+    request: Request<B>,
+    next: Next<B>,
+) -> Result<Response, StatusCode>
+where
+    B: Send,
+{
+    // running extractors requires a `axum::http::request::Parts`
+    let (mut parts, body) = request.into_parts();
+
+    // `TypedHeader<Authorization<Bearer>>` extracts the auth token
+    let auth: TypedHeader<Authorization<Bearer>> = parts
+        .extract()
+        .await
+        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+
+    let client_cookie = cookies.get(auth.token());
+    if client_cookie == None {
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
+    // reconstruct the request
+    let request = Request::from_parts(parts, body);
+
+    Ok(next.run(request).await)
 }
