@@ -44,6 +44,7 @@ async fn main() {
         .layer(axum::middleware::from_fn(handlers::auth_fn))
         .route("/", get(|| async { "Hello, World!" }))
         .route("/register_client", get(handlers::register_client))
+        .route("/auth_resource", get(handlers::resource_auth))
         .layer(Extension(db))
         .layer(CookieManagerLayer::new());
 

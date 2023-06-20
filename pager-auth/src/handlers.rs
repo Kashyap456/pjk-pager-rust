@@ -155,3 +155,27 @@ where
 
     Ok(next.run(request).await)
 }
+
+pub async fn resource_auth<B>(
+    cookies: Cookies,
+    request: Request<B>,
+) -> Result<StatusCode, StatusCode>
+where
+    B: Send,
+{
+    // running extractors requires a `axum::http::request::Parts`
+    let (mut parts, body) = request.into_parts();
+
+    // `TypedHeader<Authorization<Bearer>>` extracts the auth token
+    let auth: TypedHeader<Authorization<Bearer>> = parts
+        .extract()
+        .await
+        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+
+    let client_cookie = cookies.get(auth.token());
+    if client_cookie == None {
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
+    Ok(StatusCode::OK)
+}
