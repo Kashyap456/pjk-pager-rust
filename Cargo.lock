@@ -904,6 +904,9 @@ name = "pager-server"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "http",
+ "reqwest",
+ "serde",
  "sqlx",
  "tokio",
 ]

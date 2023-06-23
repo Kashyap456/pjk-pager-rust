@@ -1,4 +1,4 @@
-use crate::db::{self, UserRec};
+use crate::db;
 use axum::extract::{Extension, TypedHeader};
 use axum::headers::{authorization::Bearer, Authorization};
 use axum::middleware::Next;

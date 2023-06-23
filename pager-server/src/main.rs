@@ -5,6 +5,9 @@ use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 
 const DB_URL: &str = "sqlite://sqlite.db";
 
+mod db;
+mod handlers;
+
 #[tokio::main]
 async fn main() {
     println!("Hello, world!");
@@ -35,7 +38,9 @@ async fn main() {
 
     println!("migration: {:?}", migration_results);
 
-    let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+    let app = Router::new()
+        .layer(axum::middleware::from_fn(handlers::check_user_auth))
+        .route("/", get(|| async { "Hello, World!" }));
 
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
