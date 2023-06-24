@@ -1,0 +1,65 @@
+{
+  "db": "SQLite",
+  "01a59cdd3c4dc963c0f06df6d646a6b0b95e4a64f802d0ddd76388880a5441a9": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT user, group_name as name FROM memberships"
+  },
+  "792394e4e2ce32d92c5ac78ee9dd01ce048a89606c9b8a37569c73a7100b09ca": {
+    "describe": {
+      "columns": [
+        {
+          "name": "name",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Right": 0
+      }
+    },
+    "query": "SELECT group_name as name FROM groups"
+  },
+  "909d57c81dcda51f101416e6a218b625b559660e738428753e19118df0acba62": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "INSERT INTO groups (group_name, group_owner) VALUES (?, ?)"
+  },
+  "da8222268500da0e774268fd8cb51321daece81131fd42a12951cd41e1d72db9": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "INSERT INTO memberships (user, group_name, is_admin) VALUES (?, ?, ?)"
+  }
+}

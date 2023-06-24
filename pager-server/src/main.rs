@@ -1,6 +1,9 @@
 use core::panic;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 
 const DB_URL: &str = "sqlite://sqlite.db";
@@ -39,8 +42,16 @@ async fn main() {
     println!("migration: {:?}", migration_results);
 
     let app = Router::new()
-        .layer(axum::middleware::from_fn(handlers::check_user_auth))
-        .route("/", get(|| async { "Hello, World!" }));
+        .route_layer(axum::middleware::from_fn(handlers::check_user_auth))
+        .route("/", get(|| async { "Hello, World!" }))
+        .route(
+            "/groups",
+            post(handlers::create_group).get(handlers::list_groups),
+        )
+        .route(
+            "/memberships",
+            get(handlers::list_memberships).post(handlers::join_group),
+        );
 
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())

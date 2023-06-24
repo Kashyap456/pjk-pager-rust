@@ -3,5 +3,6 @@
 members = [
     "pager-client",
     "pager-server",
-    "pager-auth"
+    "pager-auth",
+    "pager-ws"
 ]

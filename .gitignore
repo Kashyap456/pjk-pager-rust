@@ -1,5 +1,7 @@
 .DS_Store
 keyvalue.db
+sqlite.db
+pager-server/sqlite.db
 pager-auth/keyvalue.db
 pager-client/keys.json
 target/

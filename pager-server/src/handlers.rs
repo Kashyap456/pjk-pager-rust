@@ -15,6 +15,12 @@ pub struct Group {
     owner: String,
     members: Option<Vec<String>>,
 }
+#[derive(Deserialize)]
+pub struct Membership {
+    name: String,
+    user: String,
+    is_admin: Option<bool>,
+}
 
 pub async fn check_user_auth<B>(request: Request<B>, next: Next<B>) -> Result<Response, StatusCode>
 where
@@ -54,4 +60,26 @@ pub async fn create_group(
     db::add_group(conn.clone(), body.name.clone(), body.owner.clone()).await;
     db::add_memberships(conn, body.owner, body.name, 1).await;
     Ok(())
+}
+
+pub async fn join_group(
+    Extension(conn): Extension<Pool<Sqlite>>,
+    Json(body): Json<Membership>,
+) -> Result<impl IntoResponse, StatusCode> {
+    db::add_memberships(conn, body.user, body.name, 0).await;
+    Ok(())
+}
+
+pub async fn list_groups(
+    Extension(conn): Extension<Pool<Sqlite>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let res = db::get_groups(conn).await;
+    Ok(Json(res))
+}
+
+pub async fn list_memberships(
+    Extension(conn): Extension<Pool<Sqlite>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let res = db::get_groups(conn).await;
+    Ok(Json(res))
 }
