@@ -40,9 +40,8 @@ async fn main() {
     }
 
     println!("migration: {:?}", migration_results);
-
+    //.route_layer(axum::middleware::from_fn(handlers::check_user_auth))
     let app = Router::new()
-        .route_layer(axum::middleware::from_fn(handlers::check_user_auth))
         .route("/", get(|| async { "Hello, World!" }))
         .route(
             "/groups",

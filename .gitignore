@@ -4,4 +4,8 @@ sqlite.db
 pager-server/sqlite.db
 pager-auth/keyvalue.db
 pager-client/keys.json
+pager-auth/keyvalue.db-shm
+pager-auth/keyvalue.db-wal
+pager-server/sqlite.db-shm
+pager-server/sqlite.db-wal
 target/

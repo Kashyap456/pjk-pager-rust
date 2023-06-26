@@ -1,6 +1,9 @@
 use core::panic;
 
-use axum::{routing::get, Extension, Router};
+use axum::{
+    routing::{get, post},
+    Extension, Router,
+};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 use tower_cookies::CookieManagerLayer;
 
@@ -45,6 +48,8 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/register_client", get(handlers::register_client))
         .route("/auth_resource", get(handlers::resource_auth))
+        .route("/login_user", get(handlers::login_user))
+        .route("/register_user", post(handlers::register_user))
         .layer(Extension(db))
         .layer(CookieManagerLayer::new());
 

@@ -40,7 +40,7 @@ pub async fn get_user(pool: SqlitePool, user_id: String) -> Option<UserRec> {
 
     if let Some(record) = rec {
         Some(UserRec {
-            username: record.username,
+            username: record.username.unwrap(),
             salt: record.salt,
             userhash: record.userhash,
         })

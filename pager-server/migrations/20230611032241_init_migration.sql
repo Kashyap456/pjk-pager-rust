@@ -1,4 +1,9 @@
 -- Add migration script here
+CREATE TABLE IF NOT EXISTS users
+(
+    username TEXT PRIMARY KEY
+);
+
 CREATE TABLE IF NOT EXISTS groups
 (
     group_name TEXT PRIMARY KEY,

@@ -117,10 +117,10 @@ pub async fn login_user(
         .take(16)
         .map(char::from)
         .collect();
-    let mut access_cookie = Cookie::new(access_token.clone(), "auth");
+    let mut access_cookie = Cookie::new(access_token.clone(), body.username.clone());
     access_cookie.set_max_age(Some(Duration::DAY));
     cookies.add(access_cookie);
-    let mut refresh_cookie = Cookie::new(refresh_token.clone(), "refresh");
+    let mut refresh_cookie = Cookie::new(refresh_token.clone(), body.username);
     refresh_cookie.set_max_age(Some(Duration::WEEK));
     cookies.add(refresh_cookie);
     Ok(Json(
