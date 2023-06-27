@@ -2,7 +2,7 @@ use core::panic;
 
 use axum::{
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 
@@ -50,7 +50,9 @@ async fn main() {
         .route(
             "/memberships",
             get(handlers::list_memberships).post(handlers::join_group),
-        );
+        )
+        .route("/users", post(handlers::sync_user))
+        .layer(Extension(db));
 
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())

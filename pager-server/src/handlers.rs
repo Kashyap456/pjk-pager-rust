@@ -12,7 +12,7 @@ use sqlx::{Pool, Sqlite};
 #[derive(Deserialize)]
 pub struct Group {
     name: String,
-    owner: String,
+    user: String,
     members: Option<Vec<String>>,
 }
 #[derive(Deserialize)]
@@ -57,8 +57,8 @@ pub async fn create_group(
     Extension(conn): Extension<Pool<Sqlite>>,
     Json(body): Json<Group>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    db::add_group(conn.clone(), body.name.clone(), body.owner.clone()).await;
-    db::add_memberships(conn, body.owner, body.name, 1).await;
+    db::add_group(conn.clone(), body.name.clone(), body.user.clone()).await;
+    db::add_memberships(conn, body.user, body.name, 1).await;
     Ok(())
 }
 
@@ -68,6 +68,14 @@ pub async fn join_group(
 ) -> Result<impl IntoResponse, StatusCode> {
     db::add_memberships(conn, body.user, body.name, 0).await;
     Ok(())
+}
+
+pub async fn sync_user(
+    Extension(conn): Extension<Pool<Sqlite>>,
+    Json(body): Json<Membership>,
+) -> Result<impl IntoResponse, StatusCode> {
+    db::sync_user(conn, body.user.clone()).await;
+    Ok(body.user)
 }
 
 pub async fn list_groups(

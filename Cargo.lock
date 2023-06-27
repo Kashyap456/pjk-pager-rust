@@ -916,6 +916,7 @@ dependencies = [
  "cookie",
  "http",
  "rand",
+ "reqwest",
  "serde",
  "serde_json",
  "sqlx",
@@ -927,6 +928,7 @@ dependencies = [
 name = "pager-client"
 version = "0.1.0"
 dependencies = [
+ "futures",
  "futures-util",
  "reqwest",
  "serde",

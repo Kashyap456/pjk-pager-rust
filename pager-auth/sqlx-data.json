@@ -1,5 +1,63 @@
 {
   "db": "SQLite",
+  "0ad79a6d7da11f12332d5f675e81717397a11b3333abff44aa08ec900bbd02e1": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 3
+      }
+    },
+    "query": "INSERT INTO users (username, salt, userhash) VALUES (?, ?, ?)"
+  },
+  "35e1ec3baae00cd42b32d5fe21cf3cad34242195602030bcd3e2e55b5945fd9b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "hashpass",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        true
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT hashpass FROM keyval WHERE ukey = ?"
+  },
+  "4896a1dafe5bdecbd2d91b63c6f829c6d7f6103285e6857fce019468e79f9dba": {
+    "describe": {
+      "columns": [
+        {
+          "name": "username",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "salt",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "userhash",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT username, salt, userhash from users WHERE username = ?"
+  },
   "c87c2f5ad8ac474803aadd9ee3d820c61cf5268c71b4afa803ceec6762f2d6dd": {
     "describe": {
       "columns": [],

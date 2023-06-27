@@ -27,8 +27,8 @@ type Clients = Arc<Mutex<HashMap<String, broadcast::Sender<String>>>>;
 
 #[tokio::main]
 async fn main() {
-    //let groups = reqwest::get("0.0.0.0:3000/groups").await.unwrap();
-    //print!("{}", groups.text().await.unwrap());
+    let groups = reqwest::get("http://0.0.0.0:3000/groups").await.unwrap();
+    println!("{}", groups.text().await.unwrap());
     let mut connected_users: Clients = Arc::new(Mutex::new(HashMap::new()));
     let app = Router::new()
         .route("/ws", get(handler))

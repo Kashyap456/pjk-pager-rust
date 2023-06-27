@@ -46,3 +46,10 @@ pub async fn get_memberships(pool: SqlitePool) -> Vec<(String, String)> {
     }
     vec
 }
+
+pub async fn sync_user(pool: SqlitePool, user: String) {
+    sqlx::query!("INSERT OR REPLACE INTO users (username) VALUES (?)", user)
+        .execute(&pool)
+        .await
+        .unwrap();
+}

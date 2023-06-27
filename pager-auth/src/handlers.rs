@@ -10,10 +10,11 @@ use http::{Request, StatusCode};
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use rand::{rngs::StdRng, SeedableRng};
+use reqwest;
 use serde::Deserialize;
 use serde_json::json;
 use sqlx::{Pool, Sqlite};
-use std::collections::hash_map::DefaultHasher;
+use std::collections::{hash_map::DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
 use tower_cookies::{Cookie, Cookies};
 
@@ -117,6 +118,20 @@ pub async fn login_user(
         .take(16)
         .map(char::from)
         .collect();
+
+    let client = reqwest::Client::new();
+    let mut map = HashMap::new();
+    map.insert("user", body.username.clone());
+    map.insert("name", "temp".to_owned());
+    let res = client
+        .post("http://0.0.0.0:3000/users")
+        .json(&map)
+        .send()
+        .await
+        .unwrap();
+
+    let text = res.status().as_str().to_owned();
+
     let mut access_cookie = Cookie::new(access_token.clone(), body.username.clone());
     access_cookie.set_max_age(Some(Duration::DAY));
     cookies.add(access_cookie);
@@ -124,7 +139,7 @@ pub async fn login_user(
     refresh_cookie.set_max_age(Some(Duration::WEEK));
     cookies.add(refresh_cookie);
     Ok(Json(
-        json!({"access_token": access_token, "refresh_token": refresh_token}),
+        json!({"access_token": access_token, "refresh_token": refresh_token, "debug_messsage": text}),
     ))
 }
 

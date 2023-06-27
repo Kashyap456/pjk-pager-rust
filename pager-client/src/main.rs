@@ -1,3 +1,4 @@
+use futures::stream::{SplitSink, SplitStream};
 use futures_util::{future, pin_mut, SinkExt, StreamExt};
 use reqwest::header::AUTHORIZATION;
 use reqwest::Error;
@@ -13,10 +14,11 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Auth {
     access_token: String,
     refresh_token: String,
+    debug_message: String,
 }
 
 #[tokio::main]
@@ -34,7 +36,8 @@ async fn main() -> Result<(), Error> {
 
     let mut auth: Option<Auth> = None;
     let mut username: Option<String> = None;
-    let mut stream: Option<WebSocketStream<MaybeTlsStream<TcpStream>>> = None;
+    let mut wstream: Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>> = None;
+    let mut rstream: Option<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>> = None;
 
     loop {
         let mut cmd = String::new();
@@ -67,12 +70,15 @@ async fn main() -> Result<(), Error> {
                     .send()
                     .await?;
 
+                eprintln!("{}", res.status());
                 auth = Some(res.json::<Auth>().await.unwrap());
+                eprintln!("{:?}", auth);
                 username = Some(cmd_vec[1].to_owned());
                 let url = url::Url::parse("ws://0.0.0.0:7777/ws").unwrap();
                 let (localstream, _) = connect_async(url).await.unwrap();
-                let (write, read) = localstream.split();
-                //stream = Some(localstream);
+                let (mut write, read) = localstream.split();
+                wstream = Some(write);
+                rstream = Some(read);
             }
             "register" => {
                 let mut map = HashMap::new();
@@ -101,6 +107,7 @@ async fn main() -> Result<(), Error> {
                         .json(&map)
                         .send()
                         .await?;
+                    eprintln!("{}", res.text().await.unwrap());
                 }
             }
             "join_group" => {
@@ -120,6 +127,32 @@ async fn main() -> Result<(), Error> {
                         .json(&map)
                         .send()
                         .await?;
+                }
+            }
+            "list" => {
+                if username.is_none() {
+                    eprintln!("Please login before using this command.");
+                } else {
+                    let user = username.as_ref().unwrap().as_str();
+                    let res = client
+                        .get("http://0.0.0.0:3000/groups")
+                        .header(
+                            AUTHORIZATION,
+                            "Bearer ".to_owned() + auth.as_ref().unwrap().access_token.as_str(),
+                        )
+                        .send()
+                        .await?;
+                    let groups = res.text().await.unwrap();
+                    eprintln!("{}", groups);
+                }
+            }
+            "page" => {
+                if username.is_none() {
+                    eprintln!("Please login before using this command.");
+                } else {
+                    let mut writeref = wstream.as_mut().unwrap();
+                    let message = std::format!("page {}", cmd_vec[1]);
+                    writeref.send(Message::Text(message)).await;
                 }
             }
             _ => {

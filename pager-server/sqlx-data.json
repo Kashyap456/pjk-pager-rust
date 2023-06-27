@@ -52,6 +52,16 @@
     },
     "query": "INSERT INTO groups (group_name, group_owner) VALUES (?, ?)"
   },
+  "bdb529c6610673698c43a02999a899d1b4ab49324dbd9342fbdfb3db1b712080": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "INSERT OR REPLACE INTO users (username) VALUES (?)"
+  },
   "da8222268500da0e774268fd8cb51321daece81131fd42a12951cd41e1d72db9": {
     "describe": {
       "columns": [],
