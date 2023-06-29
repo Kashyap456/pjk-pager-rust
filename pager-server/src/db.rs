@@ -47,6 +47,21 @@ pub async fn get_memberships(pool: SqlitePool) -> Vec<(String, String)> {
     vec
 }
 
+pub async fn get_memberships_by_user(pool: SqlitePool, user: String) -> Vec<String> {
+    let mut vec = Vec::new();
+    let records = sqlx::query!(
+        "SELECT user, group_name as name FROM memberships WHERE user = ?",
+        user
+    )
+    .fetch_all(&pool)
+    .await
+    .unwrap();
+    for record in records {
+        vec.push(record.name);
+    }
+    vec
+}
+
 pub async fn sync_user(pool: SqlitePool, user: String) {
     sqlx::query!("INSERT OR REPLACE INTO users (username) VALUES (?)", user)
         .execute(&pool)

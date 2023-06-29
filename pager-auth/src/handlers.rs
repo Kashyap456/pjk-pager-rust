@@ -139,7 +139,7 @@ pub async fn login_user(
     refresh_cookie.set_max_age(Some(Duration::WEEK));
     cookies.add(refresh_cookie);
     Ok(Json(
-        json!({"access_token": access_token, "refresh_token": refresh_token, "debug_messsage": text}),
+        json!({"access_token": access_token, "refresh_token": refresh_token, "debug": text}),
     ))
 }
 

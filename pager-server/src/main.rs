@@ -52,6 +52,7 @@ async fn main() {
             get(handlers::list_memberships).post(handlers::join_group),
         )
         .route("/users", post(handlers::sync_user))
+        .route("/userin", get(handlers::list_memberships_by_user))
         .layer(Extension(db));
 
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())

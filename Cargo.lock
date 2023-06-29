@@ -943,6 +943,7 @@ name = "pager-server"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "axum-macros",
  "http",
  "reqwest",
  "serde",
@@ -965,6 +966,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio",
+ "tokio-stream",
  "tower-cookies",
 ]
 
@@ -1618,6 +1620,7 @@ dependencies = [
  "futures-core",
  "pin-project-lite",
  "tokio",
+ "tokio-util",
 ]
 
 [[package]]

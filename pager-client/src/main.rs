@@ -18,7 +18,7 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 struct Auth {
     access_token: String,
     refresh_token: String,
-    debug_message: String,
+    debug: String,
 }
 
 #[tokio::main]
@@ -70,9 +70,7 @@ async fn main() -> Result<(), Error> {
                     .send()
                     .await?;
 
-                eprintln!("{}", res.status());
                 auth = Some(res.json::<Auth>().await.unwrap());
-                eprintln!("{:?}", auth);
                 username = Some(cmd_vec[1].to_owned());
                 let url = url::Url::parse("ws://0.0.0.0:7777/ws").unwrap();
                 let (localstream, _) = connect_async(url).await.unwrap();

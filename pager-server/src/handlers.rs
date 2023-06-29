@@ -1,9 +1,10 @@
 use crate::db;
-use axum::extract::{Extension, TypedHeader};
+use axum::extract::{Extension, Query, TypedHeader};
 use axum::headers::{authorization::Bearer, Authorization};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use axum::{Json, RequestPartsExt};
+use axum_macros::debug_handler;
 use http::{Request, StatusCode};
 use reqwest::header::AUTHORIZATION;
 use serde::Deserialize;
@@ -20,6 +21,11 @@ pub struct Membership {
     name: String,
     user: String,
     is_admin: Option<bool>,
+}
+
+#[derive(Deserialize)]
+pub struct User {
+    user: String,
 }
 
 pub async fn check_user_auth<B>(request: Request<B>, next: Next<B>) -> Result<Response, StatusCode>
@@ -89,5 +95,14 @@ pub async fn list_memberships(
     Extension(conn): Extension<Pool<Sqlite>>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let res = db::get_groups(conn).await;
+    Ok(Json(res))
+}
+
+#[debug_handler]
+pub async fn list_memberships_by_user(
+    Query(user): Query<User>,
+    Extension(conn): Extension<Pool<Sqlite>>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let res = db::get_memberships_by_user(conn, user.user).await;
     Ok(Json(res))
 }

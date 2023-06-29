@@ -52,6 +52,30 @@
     },
     "query": "INSERT INTO groups (group_name, group_owner) VALUES (?, ?)"
   },
+  "add3bd02310a76d40e6337cccf1f3b5f000678db0169d29829018aa3cda2bd91": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT user, group_name as name FROM memberships WHERE user = ?"
+  },
   "bdb529c6610673698c43a02999a899d1b4ab49324dbd9342fbdfb3db1b712080": {
     "describe": {
       "columns": [],
