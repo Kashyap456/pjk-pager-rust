@@ -1,14 +1,14 @@
+use execute::Execute;
 use futures::stream::{SplitSink, SplitStream};
 use futures_util::{future, pin_mut, SinkExt, StreamExt};
 use reqwest::header::AUTHORIZATION;
 use reqwest::Error;
 use serde::Deserialize;
-use serde_json;
 use std::collections::HashMap;
 use std::fs;
-use std::io;
-use std::io::Write;
+use std::io::{self, Write};
 use std::path::Path;
+use std::process::Command;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
@@ -23,6 +23,7 @@ struct Auth {
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    const league_path: &str = "/Applications/League of Legends.app";
     let client = reqwest::Client::new();
     let keys = Path::new("./keys.json");
     if !keys.exists() {
@@ -41,6 +42,7 @@ async fn main() -> Result<(), Error> {
 
     loop {
         let mut cmd = String::new();
+        let mut command: Command = Command::new(league_path);
 
         if let Some(prompt) = username.as_ref() {
             eprint!("{}: ", prompt);
@@ -83,6 +85,11 @@ async fn main() -> Result<(), Error> {
                     {
                         // Add username before message.
                         eprintln!("{}", &group);
+                        Command::new("open")
+                            .arg("-a")
+                            .arg("RiotClient")
+                            .spawn()
+                            .expect("Failed to start League of Legends.");
                     }
                 });
             }
