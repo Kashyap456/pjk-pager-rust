@@ -51,24 +51,22 @@ async fn main() {
         .unwrap();
 }
 
-async fn handler(
-    ws: WebSocketUpgrade,
-    State(groups): State<Groups>,
-    Json(user): Json<User>,
-) -> Response {
-    ws.on_upgrade(|socket| handle_socket(socket, user.name, groups))
+async fn handler(ws: WebSocketUpgrade, State(groups): State<Groups>) -> Response {
+    ws.on_upgrade(|socket| handle_socket(socket, "kashyap".to_owned(), groups))
 }
 
 async fn handle_socket(mut socket: WebSocket, user: String, map: Groups) {
+    let (mut sender, mut receiver) = socket.split();
     let mut receivers = Vec::new();
     let client = reqwest::Client::new();
     let groups = client
         .get("http://0.0.0.0:3000/userin")
-        .query(&[("name", user)])
+        .query(&[("user", user)])
         .send()
         .await
         .unwrap();
     let groups = groups.text().await.unwrap();
+    //eprintln!("{}", groups.as_str());
     let groups: Vec<String> = serde_json::from_str(groups.as_str()).unwrap();
     for group in groups {
         let guard = map.lock().unwrap();
@@ -78,18 +76,33 @@ async fn handle_socket(mut socket: WebSocket, user: String, map: Groups) {
         }
     }
     let mut fused_streams = select_all(receivers.into_iter().map(BroadcastStream::new));
-    while let Some(msg) = socket.recv().await {
-        let msg = if let Ok(msg) = msg {
-            msg
-        } else {
-            // client disconnected
-            return;
-        };
 
-        eprintln!("{}", msg.to_text().unwrap());
-        if socket.send(msg).await.is_err() {
-            // client disconnected
-            return;
+    let mut send_task = tokio::spawn(async move {
+        while let Some(msg) = fused_streams.next().await {
+            // In any websocket error, break loop.
+            let msg = msg.unwrap();
+            eprintln!("{}", &msg);
+            if sender.send(Message::Text(msg)).await.is_err() {
+                break;
+            }
         }
-    }
+    });
+
+    let mut recv_task = tokio::spawn(async move {
+        while let Some(Ok(Message::Text(group))) = receiver.next().await {
+            // Add username before message.
+            eprintln!("{}", &group);
+            let group: Vec<&str> = group.split_whitespace().collect();
+            let group = group[1];
+            let gmap = map.lock().unwrap();
+            if let Some(tx) = gmap.get(group) {
+                tx.send("GET ON LEAGUE OF LEGENDS".to_string());
+            }
+        }
+    });
+
+    tokio::select! {
+        _ = (&mut send_task) => recv_task.abort(),
+        _ = (&mut recv_task) => send_task.abort(),
+    };
 }

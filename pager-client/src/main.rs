@@ -77,6 +77,14 @@ async fn main() -> Result<(), Error> {
                 let (mut write, read) = localstream.split();
                 wstream = Some(write);
                 rstream = Some(read);
+                let mut recv_task = tokio::spawn(async move {
+                    while let Some(Ok(Message::Text(group))) =
+                        rstream.as_mut().unwrap().next().await
+                    {
+                        // Add username before message.
+                        eprintln!("{}", &group);
+                    }
+                });
             }
             "register" => {
                 let mut map = HashMap::new();
