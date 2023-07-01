@@ -3,12 +3,14 @@ import { access } from "fs";
 import React from "react";
 import { useState } from "react";
 import { Store } from "tauri-plugin-store-api";
+import { useNavigate } from "react-router-dom";
 
 const onSubmit = async (
   username: string,
   password: string,
   event: React.FormEvent<HTMLFormElement>
 ) => {
+  event.preventDefault();
   const store = new Store(".keys.dat");
   let response = await axios.post("http://localhost:8080/login_user", {
     username,
@@ -16,11 +18,11 @@ const onSubmit = async (
   });
   if (response.status != 200) {
     console.error(response.statusText);
-    return;
+    return false;
   }
   const { access_token, refresh_token } = response.data;
   await store.set("access", { value: access_token });
-  event.preventDefault();
+  return true;
 };
 
 const onChange = (
@@ -33,12 +35,19 @@ const onChange = (
 export const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   return (
     <div>
       <form
         className="grid grid-cols-1"
-        onSubmit={(event) => onSubmit(username, password, event)}
+        onSubmit={(event) => {
+          onSubmit(username, password, event).then((res) => {
+            if (res) {
+              navigate("/home");
+            }
+          });
+        }}
       >
         <input
           type="text"
