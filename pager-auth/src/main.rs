@@ -4,8 +4,13 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use http::{
+    header::{AUTHORIZATION, CONTENT_TYPE},
+    Method,
+};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 use tower_cookies::CookieManagerLayer;
+use tower_http::cors::{Any, CorsLayer};
 
 mod db;
 mod handlers;
@@ -48,10 +53,16 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route("/register_client", get(handlers::register_client))
         .route("/auth_resource", get(handlers::resource_auth))
-        .route("/login_user", get(handlers::login_user))
+        .route("/login_user", post(handlers::login_user))
         .route("/register_user", post(handlers::register_user))
         .layer(Extension(db))
-        .layer(CookieManagerLayer::new());
+        .layer(CookieManagerLayer::new())
+        .layer(
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST])
+                .allow_origin(Any)
+                .allow_headers([AUTHORIZATION, CONTENT_TYPE]),
+        );
 
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
         .serve(app.into_make_service())
