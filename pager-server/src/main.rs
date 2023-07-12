@@ -59,14 +59,9 @@ async fn main() {
         .route("/users", post(handlers::sync_user))
         .route("/userin", get(handlers::list_memberships_by_user))
         .layer(Extension(db))
-        .layer(
-            CorsLayer::new()
-                .allow_methods(Any)
-                .allow_origin(Any)
-                .allow_headers(Any),
-        );
+        .layer(CorsLayer::very_permissive());
 
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();

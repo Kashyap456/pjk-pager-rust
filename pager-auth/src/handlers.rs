@@ -124,7 +124,7 @@ pub async fn login_user(
     map.insert("user", body.username.clone());
     map.insert("name", "temp".to_owned());
     let res = client
-        .post("http://0.0.0.0:3000/users")
+        .post("http://127.0.0.1:8000/users")
         .json(&map)
         .send()
         .await

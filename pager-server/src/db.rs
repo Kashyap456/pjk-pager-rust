@@ -1,14 +1,17 @@
 use sqlx::SqlitePool;
 
 pub async fn add_group(pool: SqlitePool, group_name: String, group_owner: String) {
-    sqlx::query!(
+    let out = sqlx::query!(
         "INSERT INTO groups (group_name, group_owner) VALUES (?, ?)",
         group_name,
         group_owner,
     )
     .execute(&pool)
-    .await
-    .unwrap();
+    .await;
+    match out {
+        Ok(_) => (),
+        Err(error) => eprintln!("{}", error),
+    }
 }
 
 pub async fn add_memberships(pool: SqlitePool, user: String, group_name: String, is_admin: u32) {
