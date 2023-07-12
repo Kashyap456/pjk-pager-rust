@@ -19,3 +19,4 @@ sqlx = { version = "0.6.1", features = ["runtime-tokio-native-tls", "sqlite", "m
 tokio = { version = "1.28.2", features = ["full"] }
 tokio-stream = { version = "0.1.14", features = ["sync"] }
 tower-cookies = "0.9.0"
+tower-http = { version = "0.4.1", features = ["cors"] }

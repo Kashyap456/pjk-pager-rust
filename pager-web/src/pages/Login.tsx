@@ -20,8 +20,13 @@ const onSubmit = async (
     console.error(response.statusText);
     return false;
   }
+  console.log(response.data);
   const { access_token, refresh_token } = response.data;
-  await store.set("access", { value: access_token });
+  await store.set("access", {
+    username,
+    access: access_token,
+    refresh: refresh_token,
+  });
   return true;
 };
 

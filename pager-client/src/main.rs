@@ -67,7 +67,7 @@ async fn main() -> Result<(), Error> {
                 map.insert("username", &cmd_vec[1]);
                 map.insert("password", &cmd_vec[2]);
                 let res = client
-                    .get("http://0.0.0.0:8080/login_user")
+                    .post("http://localhost:8080/login_user")
                     .json(&map)
                     .send()
                     .await?;

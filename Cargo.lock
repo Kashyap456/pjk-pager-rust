@@ -1000,6 +1000,7 @@ dependencies = [
  "serde",
  "sqlx",
  "tokio",
+ "tower-http",
 ]
 
 [[package]]
@@ -1019,6 +1020,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tower-cookies",
+ "tower-http",
 ]
 
 [[package]]

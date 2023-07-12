@@ -9,7 +9,7 @@ const GroupCard = ({ name }: GroupCardProps) => {
   return (
     <div>
       <h3>{name}</h3>
-      <div>{}</div>
+      <button>Page</button>
     </div>
   );
 };

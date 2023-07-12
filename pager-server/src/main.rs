@@ -4,7 +4,12 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use http::{
+    header::{AUTHORIZATION, CONTENT_TYPE},
+    Method,
+};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
+use tower_http::cors::{Any, CorsLayer};
 
 const DB_URL: &str = "sqlite://sqlite.db";
 
@@ -53,7 +58,13 @@ async fn main() {
         )
         .route("/users", post(handlers::sync_user))
         .route("/userin", get(handlers::list_memberships_by_user))
-        .layer(Extension(db));
+        .layer(Extension(db))
+        .layer(
+            CorsLayer::new()
+                .allow_methods(Any)
+                .allow_origin(Any)
+                .allow_headers(Any),
+        );
 
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())

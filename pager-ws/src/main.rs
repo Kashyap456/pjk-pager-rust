@@ -16,9 +16,14 @@ use futures::{
     stream::select_all,
     stream::{SelectAll, StreamExt},
 };
+use http::{
+    header::{AUTHORIZATION, CONTENT_TYPE},
+    Method,
+};
 use reqwest;
 use tokio::sync::{broadcast, Mutex};
 use tokio_stream::wrappers::BroadcastStream;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Deserialize)]
 struct User {
@@ -61,7 +66,13 @@ async fn main() {
     }
     let app = Router::new()
         .route("/ws", get(handler))
-        .with_state(app_state);
+        .with_state(app_state)
+        .layer(
+            CorsLayer::new()
+                .allow_methods(Any)
+                .allow_origin(Any)
+                .allow_headers(Any),
+        );
 
     axum::Server::bind(&"0.0.0.0:7777".parse().unwrap())
         .serve(app.into_make_service())
@@ -105,6 +116,7 @@ async fn handle_socket(mut socket: WebSocket, user: String, mut map: AppState) {
             let msg = msg.unwrap();
             eprintln!("{}", &msg);
             if sender.send(Message::Text(msg)).await.is_err() {
+                eprintln!("Error on send task");
                 break;
             }
         }
@@ -124,9 +136,15 @@ async fn handle_socket(mut socket: WebSocket, user: String, mut map: AppState) {
                 }
                 "create" => {
                     let group = cmd_vec[1];
-                    let (tx, rx) = broadcast::channel(100);
+                    let (tx, _rx) = broadcast::channel(100);
                     let rx = tx.clone().subscribe();
-                    map.set_group(group.to_owned(), tx);
+                    map.set_group(group.to_owned(), tx).await;
+                    send_stream.lock().await.push(rx.into());
+                }
+                "join" => {
+                    let group = cmd_vec[1];
+                    let tx = map.get_group(group.to_owned()).await.unwrap();
+                    let rx = tx.clone().subscribe();
                     send_stream.lock().await.push(rx.into());
                 }
                 _ => eprintln!("Ill-formatted command"),
