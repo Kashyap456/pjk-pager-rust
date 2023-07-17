@@ -32,6 +32,7 @@ type Groups = Arc<Mutex<HashMap<String, broadcast::Sender<String>>>>;
 async fn main() {
     let groups = reqwest::get("http://127.0.0.1:8000/groups").await.unwrap();
     let groups = groups.text().await.unwrap();
+    eprintln!("{}", groups.as_str());
     let groups: Vec<String> = serde_json::from_str(groups.as_str()).unwrap();
     let mut connected_users: Groups = Arc::new(Mutex::new(HashMap::new()));
     for group in groups {
@@ -122,7 +123,7 @@ async fn handle_socket(mut socket: WebSocket, user: String, map: Groups) {
                     let mut gmap = map.lock().await;
                     let tx = gmap.get(group);
                     if let Some(txo) = tx {
-                        let rx = tx.unwrap().subscribe();
+                        let rx = txo.subscribe();
                         let mut select_all_guard = fused_streams.lock().await;
                         select_all_guard.push(BroadcastStream::new(rx));
                     }

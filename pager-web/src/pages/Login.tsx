@@ -27,6 +27,10 @@ const onSubmit = async (
     access: access_token,
     refresh: refresh_token,
   });
+  await axios.post("http://localhost:8000/users", {
+    name: "REDACTED",
+    user: username,
+  });
   return true;
 };
 

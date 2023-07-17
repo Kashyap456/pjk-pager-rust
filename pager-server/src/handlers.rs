@@ -68,6 +68,14 @@ pub async fn create_group(
     Ok(())
 }
 
+pub async fn delete_group(
+    Extension(conn): Extension<Pool<Sqlite>>,
+    Query(body): Query<Group>,
+) -> Result<impl IntoResponse, StatusCode> {
+    db::delete_group(conn.clone(), body.name.clone(), body.user.clone()).await;
+    Ok(())
+}
+
 pub async fn join_group(
     Extension(conn): Extension<Pool<Sqlite>>,
     Json(body): Json<Membership>,

@@ -16,22 +16,35 @@ const onJoin = async (group: string, ws: WebSocket) => {
     throw new Error("Authentication failed.");
   }
   const { username, access, refresh } = token;
-  let res = await axios.post(
-    "http://localhost:8000/memberships",
-    {
-      name: group,
-      user: username,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${access}`,
+  let user = username;
+  console.log(user);
+  let res = await axios
+    .post(
+      "http://localhost:8000/memberships",
+      {
+        name: group,
+        user,
       },
-    }
-  );
-  if (res.status != 200) {
-    console.log(res.data);
+      {
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      }
+    )
+    .catch(async (err) => {
+      if (err) {
+        console.log(err.response && err.response.data);
+      }
+    });
+  if (!!!res) {
+    return;
   }
-  await ws.send(`join ${group}`);
+  console.log(res.data);
+  await ws.send(`join ${name}`).catch((err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
 };
 
 const onCreate = async (name: string, ws: WebSocket) => {
@@ -42,9 +55,6 @@ const onCreate = async (name: string, ws: WebSocket) => {
   }
   const { username, access, refresh } = token;
   let user = username;
-  console.log("here");
-  // let res = await axios.get("/api/").catch((err) => console.log(err));
-  // console.log(res && res.data);
   let res = await axios
     .post(
       "http://localhost:8000/groups",
@@ -80,6 +90,7 @@ export const Home = () => {
   const [groups, setGroups] = useState([]);
   const [message, setMessage] = useState("");
   const [groupmute, setGroupMute] = useState("");
+  const [updateTrigger, setUpdateTrigger] = useState(false);
   const [websocket, setWebSocket] = useState<WebSocket | undefined>(undefined);
 
   useEffect(() => {
@@ -117,37 +128,47 @@ export const Home = () => {
         throw new Error("Authentication failed.");
       }
       const { username, access, refresh } = token;
+      console.log(username);
       let user = username;
       const res = await axios.get(
         `http://localhost:8000/userin?user=${username}`
       );
       const groups = res.data;
+      console.log(groups);
       setGroups(groups);
     };
     getGroups();
-  }, [message]);
+  }, [message, updateTrigger]);
 
   return (
     <div className="shadow-md">
       {websocket &&
         groups.map((group) => (
-          <GroupCard key={group} name={group} ws={websocket} />
+          <GroupCard
+            key={group}
+            group={group}
+            ws={websocket}
+            update={setUpdateTrigger}
+          />
         ))}
       <form>
         <input
           type="text"
           placeholder="group name"
+          value={groupmute}
           onChange={(e) => setGroupMute(e.target.value)}
         />
         <button
           type="submit"
           value="create"
-          onClick={(event) => {
+          onClick={async (event) => {
             event.preventDefault();
+            event.persist();
             if (websocket) {
-              onCreate(groupmute, websocket);
+              await onCreate(groupmute, websocket);
+              setGroupMute("");
+              setUpdateTrigger((prev) => !prev);
             }
-            setGroupMute("");
           }}
         >
           Create
@@ -155,12 +176,14 @@ export const Home = () => {
         <button
           type="submit"
           value="join"
-          onClick={(event) => {
+          onClick={async (event) => {
             event.preventDefault();
+            event.persist();
             if (websocket) {
-              onJoin(groupmute, websocket);
+              await onJoin(groupmute, websocket);
+              setGroupMute("");
+              setUpdateTrigger((prev) => !prev);
             }
-            setGroupMute("");
           }}
         >
           Join

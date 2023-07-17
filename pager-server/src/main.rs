@@ -1,7 +1,7 @@
 use core::panic;
 
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, post},
     Extension, Router,
 };
 use http::{
@@ -50,7 +50,9 @@ async fn main() {
         .route("/", get(|| async { "Hello, World!" }))
         .route(
             "/groups",
-            post(handlers::create_group).get(handlers::list_groups),
+            post(handlers::create_group)
+                .get(handlers::list_groups)
+                .delete(handlers::delete_group),
         )
         .route(
             "/memberships",

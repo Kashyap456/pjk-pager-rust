@@ -24,6 +24,16 @@
     },
     "query": "SELECT user, group_name as name FROM memberships"
   },
+  "6b11994745ad8a5fbbe9a67aa4f59eaecc3bf1a4ff4dda2eb4a0866ab7dbd0e5": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "DELETE FROM memberships WHERE group_name = ?"
+  },
   "792394e4e2ce32d92c5ac78ee9dd01ce048a89606c9b8a37569c73a7100b09ca": {
     "describe": {
       "columns": [
@@ -52,30 +62,6 @@
     },
     "query": "INSERT INTO groups (group_name, group_owner) VALUES (?, ?)"
   },
-  "add3bd02310a76d40e6337cccf1f3b5f000678db0169d29829018aa3cda2bd91": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user",
-          "ordinal": 0,
-          "type_info": "Text"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Right": 1
-      }
-    },
-    "query": "SELECT user, group_name as name FROM memberships WHERE user = ?"
-  },
   "bdb529c6610673698c43a02999a899d1b4ab49324dbd9342fbdfb3db1b712080": {
     "describe": {
       "columns": [],
@@ -85,6 +71,46 @@
       }
     },
     "query": "INSERT OR REPLACE INTO users (username) VALUES (?)"
+  },
+  "d260b3686d2808e580b4e16338e9768cb3675f263579aa7d0b8ad83dc9490305": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Right": 2
+      }
+    },
+    "query": "DELETE FROM groups WHERE group_name = ? AND group_owner = ?"
+  },
+  "d2ac0c04c33b4db673d22a586787ab62f919f6098e44f4e1e9c92bea08761bf7": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "is_admin",
+          "ordinal": 1,
+          "type_info": "Int64"
+        },
+        {
+          "name": "name",
+          "ordinal": 2,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        false
+      ],
+      "parameters": {
+        "Right": 1
+      }
+    },
+    "query": "SELECT user, is_admin, group_name as name FROM memberships WHERE user = ?"
   },
   "da8222268500da0e774268fd8cb51321daece81131fd42a12951cd41e1d72db9": {
     "describe": {
