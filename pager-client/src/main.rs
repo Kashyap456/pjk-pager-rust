@@ -148,11 +148,12 @@ async fn main() -> Result<(), Error> {
                 } else {
                     let user = username.as_ref().unwrap().as_str();
                     let res = client
-                        .get("http://127.0.0.1:8000/groups")
+                        .get("http://127.0.0.1:8000/userin")
                         .header(
                             AUTHORIZATION,
                             "Bearer ".to_owned() + auth.as_ref().unwrap().access_token.as_str(),
                         )
+                        .query(&[("user", user)])
                         .send()
                         .await?;
                     let groups = res.text().await.unwrap();

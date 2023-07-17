@@ -5,6 +5,7 @@ import WebSocket from "tauri-plugin-websocket-api";
 import axios from "axios";
 import { Store } from "tauri-plugin-store-api";
 import { Key } from "../utils";
+import { GroupCard } from "./components/GroupCard";
 
 const URL = "ws://localhost:7777/ws";
 
@@ -100,19 +101,38 @@ export const Home = () => {
         const messageText = message.data;
         console.log(messageText);
         if (typeof messageText === "string") {
-          //setMessage(messageText);
+          setMessage(messageText);
         }
       });
       setWebSocket(ws);
     };
     buildSocket();
   }, []);
-  useEffect(() => {}, [message]);
+
+  useEffect(() => {
+    const getGroups = async () => {
+      const store = new Store(".keys.dat");
+      let token: Key | null = await store.get("access");
+      if (token === null) {
+        throw new Error("Authentication failed.");
+      }
+      const { username, access, refresh } = token;
+      let user = username;
+      const res = await axios.get(
+        `http://localhost:8000/userin?user=${username}`
+      );
+      const groups = res.data;
+      setGroups(groups);
+    };
+    getGroups();
+  }, [message]);
+
   return (
     <div className="shadow-md">
-      {groups.map((group) => (
-        <p>{group}</p>
-      ))}
+      {websocket &&
+        groups.map((group) => (
+          <GroupCard key={group} name={group} ws={websocket} />
+        ))}
       <form>
         <input
           type="text"
