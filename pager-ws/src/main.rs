@@ -23,14 +23,14 @@ struct User {
 
 #[derive(Deserialize)]
 struct GroupResponse {
-    array: Vec<String>,
+    array: Vec<(String, i64)>,
 }
 
 type Groups = Arc<Mutex<HashMap<String, broadcast::Sender<String>>>>;
 
 #[tokio::main]
 async fn main() {
-    let groups = reqwest::get("http://127.0.0.1:8000/groups").await.unwrap();
+    let groups = reqwest::get("http://0.0.0.0:8000/groups").await.unwrap();
     let groups = groups.text().await.unwrap();
     eprintln!("{}", groups.as_str());
     let groups: Vec<String> = serde_json::from_str(groups.as_str()).unwrap();
@@ -58,15 +58,16 @@ async fn handle_socket(mut socket: WebSocket, user: String, map: Groups) {
     let mut receivers = Vec::new();
     let client = reqwest::Client::new();
     let groups = client
-        .get("http://127.0.0.1:8000/userin")
+        .get("http://0.0.0.0:8000/userin")
         .query(&[("user", user)])
         .send()
         .await
         .unwrap();
     let groups = groups.text().await.unwrap();
     //eprintln!("{}", groups.as_str());
-    let groups: Vec<String> = serde_json::from_str(groups.as_str()).unwrap();
+    let groups: Vec<(String, i64)> = serde_json::from_str(groups.as_str()).unwrap();
     for group in groups {
+        let group = group.0;
         let guard = map.lock().await;
         if let Some(tx) = guard.get(&group) {
             let rx = tx.clone().subscribe();

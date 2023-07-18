@@ -56,7 +56,7 @@ async fn main() -> Result<(), Error> {
 
         match &cmd_vec[0][..] {
             "hello" => {
-                let res = reqwest::get("http://127.0.0.1:8000/").await?;
+                let res = reqwest::get("http://0.0.0.0:8000/").await?;
 
                 let body = res.text().await?;
                 println!("Request Body: {}", body);
@@ -112,7 +112,7 @@ async fn main() -> Result<(), Error> {
                     map.insert("name", cmd_vec[1]);
                     map.insert("user", user);
                     let res = client
-                        .post("http://127.0.0.1:8000/groups")
+                        .post("http://0.0.0.0:8000/groups")
                         .header(
                             AUTHORIZATION,
                             "Bearer ".to_owned() + auth.as_ref().unwrap().access_token.as_str(),
@@ -132,7 +132,7 @@ async fn main() -> Result<(), Error> {
                     map.insert("name", cmd_vec[1]);
                     map.insert("user", user);
                     let res = client
-                        .post("http://127.0.0.1:8000/memberships")
+                        .post("http://0.0.0.0:8000/memberships")
                         .header(
                             AUTHORIZATION,
                             "Bearer ".to_owned() + auth.as_ref().unwrap().access_token.as_str(),
@@ -148,7 +148,7 @@ async fn main() -> Result<(), Error> {
                 } else {
                     let user = username.as_ref().unwrap().as_str();
                     let res = client
-                        .get("http://127.0.0.1:8000/userin")
+                        .get("http://0.0.0.0:8000/userin")
                         .header(
                             AUTHORIZATION,
                             "Bearer ".to_owned() + auth.as_ref().unwrap().access_token.as_str(),

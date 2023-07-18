@@ -18,8 +18,7 @@ CREATE TABLE IF NOT EXISTS memberships
     group_name TEXT NOT NULL,
     is_admin INTEGER,
     FOREIGN KEY(user)
-        REFERENCES users (username)
-    ON DELETE CASCADE,
+        REFERENCES users (username),
     FOREIGN KEY(group_name)
         REFERENCES groups (group_name)
     ON DELETE CASCADE

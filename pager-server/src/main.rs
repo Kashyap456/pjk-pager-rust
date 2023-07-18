@@ -63,7 +63,7 @@ async fn main() {
         .layer(Extension(db))
         .layer(CorsLayer::very_permissive());
 
-    axum::Server::bind(&"127.0.0.1:8000".parse().unwrap())
+    axum::Server::bind(&"0.0.0.0:8000".parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
