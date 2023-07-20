@@ -21,7 +21,8 @@ COPY ./sqlx-data.json ./sqlx-data.json
 RUN rm ./target/release/deps/*
 ENV DATABASE_URL=sqlite://keyvalue.db
 RUN ln -s ./keyvalue.db ../keyvalue.db
-RUN cargo build --release
+RUN ls -al
+RUN cargo build
 
 # our final base
 FROM rust:latest
@@ -30,7 +31,9 @@ FROM rust:latest
 RUN apt-get update && apt-get install -y libssl1.1 && rm -rf /var/lib/apt/lists/*
 
 # copy the build artifact from the build stage
-COPY --from=builder /pager-auth/target/release/pager-auth .
+COPY --from=builder /pager-auth/target/debug/pager-auth .
+# copy the migrations directory from the build stage
+COPY --from=builder /pager-auth/migrations ./migrations
 
 # set the startup command to run your binary
 CMD ["./pager-auth"]
