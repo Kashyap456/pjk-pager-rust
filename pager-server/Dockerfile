@@ -24,7 +24,10 @@ RUN ln -s ./sqlite.db ../sqlite.db
 RUN cargo build --release
 
 # our final base
-FROM rust:latest
+FROM ubuntu:20.04
+
+# avoid tzdata interactive dialog
+ENV DEBIAN_FRONTEND=noninteractive
 
 # install OpenSSL
 RUN apt-get update && apt-get install -y libssl1.1 && rm -rf /var/lib/apt/lists/*

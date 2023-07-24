@@ -30,8 +30,8 @@ async fn main() {
 
     let db = SqlitePool::connect(DB_URL).await.unwrap();
 
-    let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-    let migrations = std::path::Path::new(&crate_dir).join("./migrations");
+    //let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    let migrations = std::path::Path::new("./migrations");
 
     let migration_results = sqlx::migrate::Migrator::new(migrations)
         .await
